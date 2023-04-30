@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Example {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FirstShift {
+  id         String    @id @default(cuid())
+  workDay    WorkDay[]
+  employees  Employee  @relation(fields: [employeeId], references: [id])
+  employeeId String
+}
+
+model WorkDay {
+  id            String       @id @default(cuid())
+  day           String
+  firstShift    FirstShift   @relation(fields: [firstShiftId], references: [id])
+  firstShiftId  String
+  SecondShift   SecondShift? @relation(fields: [secondShiftId], references: [id])
+  secondShiftId String
+}
+
+model Employee {
+  id         String       @id @default(cuid())
+  firstShift FirstShift[]
+  firstName  String
+  lastName   String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model SecondShift {
+  id      String    @id @default(cuid())
+  workDay WorkDay[]
+  // employees Employee[]
+}
