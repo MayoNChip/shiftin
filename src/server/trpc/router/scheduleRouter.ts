@@ -28,20 +28,24 @@ export const ScheduleRouter = router({
       //     ctx.prisma.firstShift.create({ data: { workDay: day.index } });
       //   }
       // }
-
-      await ctx.prisma.firstShift.create({ data: { workDay: 1 } });
-      // const results = input.map(async (day) => {
-      //   if (day.workDay) {
-      //     return await ctx.prisma.firstShift.create({
-      //       data: { workDay: day.index },
-      //     });
-      //   }
-      // });
-      // console.log(results);
-      // const newWeek = dayInWeek.map((item) => {
-      //   ctx.prisma.firstShift.create({ data: {} });
-      // });
-      // return results;
+     const workDays = await ctx.prisma.workDay.findMany()
+     if(workDays.length < 1) {
+       await ctx.prisma.workDay.createMany({data: [
+         {day:'sunday'},
+         {day:'monday'},
+         {day:'tuesday'},
+         {day:'wendesday'},
+         {day:'thursday'},
+         {day:'friday'},
+         {day:'saturday'},
+       ]})
+     }
+    input.filter(day => day.workDay === true).map( async (day) => {
+      for (let workDay of workDays) {
+        workDay.day === day.day && await ctx.prisma.firstShift.create({ data: { workDay: workDay } });
+      }
+      
+    }) 
     }),
 
   setEmployeeToShift: publicProcedure

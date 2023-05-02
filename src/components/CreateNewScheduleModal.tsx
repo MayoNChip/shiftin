@@ -94,15 +94,16 @@ function CreateNewScheduleModal({ isOpen, setIsModalOpen }: Props) {
           <div className="flex items-center">
             {weekDays?.map((day) => {
               return (
-                <>
+                <div key={day.index}>
                   <Checkbox
+                    key={day.index}
                     name={day.day.toUpperCase()}
                     value={day.index}
                     onChange={handleWeekChange}
                     // onClick={(e) => console.log(e.currentTarget)}
                   />
                   <label htmlFor={day.day}>{day.day.toUpperCase()}</label>
-                </>
+                </div>
               );
             })}
           </div>
