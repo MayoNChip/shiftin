@@ -18,19 +18,21 @@ model Example {
 
 model FirstShift {
   id         String    @id @default(cuid())
-  workDay    WorkDay[]
-  employees  Employee  @relation(fields: [employeeId], references: [id])
-  employeeId String
+  workDay    Int       @unique
+  employees  Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?
 }
 
-model WorkDay {
-  id            String       @id @default(cuid())
-  day           String
-  firstShift    FirstShift   @relation(fields: [firstShiftId], references: [id])
-  firstShiftId  String
-  SecondShift   SecondShift? @relation(fields: [secondShiftId], references: [id])
-  secondShiftId String
-}
+// model WorkDay {
+//   id            String       @id @default(cuid())
+//   day           String
+//   firstShift    FirstShift?  @relation(fields: [firstShiftId], references: [id])
+//   firstShiftId  String?
+//   SecondShift   SecondShift? @relation(fields: [secondShiftId], references: [id])
+//   secondShiftId String?
+//   SecondShift   SecondShift? @relation(fields: [secondShiftId], references: [id])
+//   secondShiftId String?
+// }
 
 model Employee {
   id         String       @id @default(cuid())
@@ -42,7 +44,7 @@ model Employee {
 }
 
 model SecondShift {
-  id      String    @id @default(cuid())
-  workDay WorkDay[]
+  id      String @id @default(cuid())
+  workDay Int
   // employees Employee[]
 }
