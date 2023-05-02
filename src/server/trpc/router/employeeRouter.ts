@@ -10,12 +10,12 @@ export const EmployeeRouter = router({
         data: { ...input },
       });
       // const result = await ctx.prisma.employee.create({data: {...input}})
-      console.log(result);
-      return "Great";
+      // console.log(result);
+      return result;
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     const employeeList = await ctx.prisma.employee.findMany();
-    console.log(employeeList);
+    // console.log(employeeList);
     return employeeList;
   }),
 });
