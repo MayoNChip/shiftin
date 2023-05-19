@@ -19,4 +19,9 @@ export const navbarItems = [
     title: "History",
     href: "/history",
   },
+  {
+    id: 5,
+    title: "Settings",
+    href: "/settings",
+  },
 ];

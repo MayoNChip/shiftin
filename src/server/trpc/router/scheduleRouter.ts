@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { router, publicProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 export const ScheduleRouter = router({
   initialSchdule: publicProcedure
@@ -14,53 +15,160 @@ export const ScheduleRouter = router({
       //   friday: z.object({ index: z.number(), workDay: z.boolean() }),
       //   saturday: z.object({ index: z.number(), workDay: z.boolean() }),
       // }).array()
+      // z.object({
+      //   monthWeek: z.object({ week: z.number(), month: z.string() }),
+      //   weekWorkDays:
       z
         .array(
-          z.object({ index: z.number(), day: z.string(), workDay: z.boolean() })
+          z.object({
+            // index: z.number(),
+            day: z.string(),
+            active: z.boolean(),
+          })
         )
         .max(7)
+      // })
     )
     .mutation(async ({ input, ctx }) => {
       // Create new week of shifts for each day
       const dayInWeek = [0, 1, 2, 3, 4];
-      // for (let day in input) {
-      //   if (day) {
-      //     ctx.prisma.firstShift.create({ data: { workDay: day.index } });
-      //   }
-      // }
-     const workDays = await ctx.prisma.workDay.findMany()
-     if(workDays.length < 1) {
-       await ctx.prisma.workDay.createMany({data: [
-         {day:'sunday'},
-         {day:'monday'},
-         {day:'tuesday'},
-         {day:'wendesday'},
-         {day:'thursday'},
-         {day:'friday'},
-         {day:'saturday'},
-       ]})
-     }
-    input.filter(day => day.workDay === true).map( async (day) => {
-      for (let workDay of workDays) {
-        workDay.day === day.day && await ctx.prisma.firstShift.create({ data: { workDay: workDay } });
+
+      const workDays = await ctx.prisma.workDay.findMany();
+      if (workDays.length < 1) {
+        await ctx.prisma.workDay.createMany({
+          data: [
+            {
+              day: "sunday",
+              // week: input.monthWeek.week,
+              // month: input.monthWeek.month,
+              active: false,
+            },
+            {
+              day: "monday",
+              // week: input.monthWeek.week,
+              // month: input.monthWeek.month,
+              active: false,
+            },
+            {
+              day: "tuesday",
+              // week: input.monthWeek.week,
+              // month: input.monthWeek.month,
+              active: false,
+            },
+            {
+              day: "wednesday",
+              // week: input.monthWeek.week,
+              // month: input.monthWeek.month,
+              active: false,
+            },
+            {
+              day: "thursday",
+              // week: input.monthWeek.week,
+              // month: input.monthWeek.month,
+              active: false,
+            },
+            {
+              day: "friday",
+              // week: input.monthWeek.week,
+              // month: input.monthWeek.month,
+              active: false,
+            },
+            {
+              day: "saturday",
+              // week: input.monthWeek.week,
+              // month: input.monthWeek.month,
+              active: false,
+            },
+          ],
+        });
       }
-      
-    }) 
+      const workDaysAfterInitialize = await ctx.prisma.workDay.findMany();
+
+      const insertedShifts = input.filter((day) => day.active === true);
+      console.log("after filter", insertedShifts);
+      insertedShifts.map(async (day) => {
+        workDaysAfterInitialize.length > 0 &&
+          workDaysAfterInitialize.map(async (workDay) => {
+            if (workDay.day === day.day) {
+              console.log(day.day, "Inserted");
+              await ctx.prisma.shift.create({
+                data: {
+                  workDayId: workDay.id,
+                  // startDate: new Date(),
+                  // endDate: new Date(),
+                  shiftTypeId: 1,
+                },
+              });
+            } else return;
+          });
+      });
+    }),
+
+  createNewSchedule: publicProcedure
+    .input(
+      z
+        .object({
+          shiftTypeId: z.number(),
+          workDayId: z.number(),
+        })
+        .array()
+    )
+    .mutation(async ({ input, ctx }) => {
+      const result = await ctx.prisma.shift.createMany({ data: [...input] });
+    }),
+  createShiftType: publicProcedure
+    .input(
+      z.object({
+        shiftName: z.string(),
+        startTime: z.date(),
+        endTime: z.date(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const duplicateType = (await ctx.prisma.shiftType.findMany()).filter(
+        (shift) => {
+          shift.shiftType === input.shiftName;
+        }
+      );
+
+      if (duplicateType.length > 0) {
+        return new TRPCError({
+          message: "this shift type already exists",
+          code: "CONFLICT",
+        });
+      }
+
+      const addShiftResult = await ctx.prisma.shiftType.create({
+        data: {
+          shiftType: input.shiftName,
+          startTime: input.startTime,
+          endTime: input.endTime,
+        },
+      });
+      return addShiftResult;
     }),
 
   setEmployeeToShift: publicProcedure
     .input(z.object({ firstName: z.string(), lastName: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const result = await ctx.prisma.employee.create({
-        data: { ...input },
+        data: { ...input, role: 1 },
       });
       // const result = await ctx.prisma.employee.create({data: {...input}})
       console.log(result);
       return "Great";
     }),
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const employeeList = await ctx.prisma.employee.findMany();
-    console.log(employeeList);
-    return employeeList;
+  getAllShiftTypes: publicProcedure.query(async ({ ctx }) => {
+    const shiftTypes = await ctx.prisma.shiftType.findMany();
+    console.log(shiftTypes);
+    return shiftTypes;
+  }),
+  getWorkingDays: publicProcedure.query(async ({ ctx }) => {
+    const workDays = await ctx.prisma.workDay.findMany({
+      where: { active: true },
+      orderBy: { id: "asc" },
+    });
+    console.log(workDays);
+    return workDays;
   }),
 });

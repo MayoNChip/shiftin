@@ -16,30 +16,48 @@ model Example {
   updatedAt DateTime @updatedAt
 }
 
-model FirstShift {
-  id         String    @id @default(cuid())
-  workDay    WorkDay?  @relation(fields: [WorkDayId], references: [id])
-  WorkDayId  String?
-  employees  Employee? @relation(fields: [employeeId], references: [id])
-  employeeId String?
+model ShiftType {
+  id        Int      @id @unique @default(autoincrement())
+  shiftType String
+  startTime DateTime
+  endTime   DateTime
+  shift     Shift[]
+}
+
+model Shift {
+  id          String           @id @default(cuid())
+  shiftType   ShiftType?       @relation(fields: [shiftTypeId], references: [id])
+  shiftTypeId Int?
+  workDay     WorkDay?         @relation(fields: [workDayId], references: [id])
+  workDayId   Int
+  employees   EmployeeShifts[]
 }
 
 model WorkDay {
-  id         String       @id @default(cuid())
-  day        String
-  FirstShift FirstShift[]
+  id     Int     @id @default(autoincrement())
+  day    String  @unique
+  shifts Shift[]
+  // week   Int
+  // month  String
+  active Boolean
 }
 
 model Employee {
-  id         String       @id @default(cuid())
-  firstShift FirstShift[]
-  firstName  String
-  lastName   String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id            String           @id @default(cuid())
+  // shift     Shift?   @relation(fields: [shiftId], references: [id])
+  // shiftId   String?
+  firstName     String
+  lastName      String
+  role          Int
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  employeeShift EmployeeShifts[]
 }
 
-model SecondShift {
-  id      String @id @default(cuid())
-  workDay Int
+model EmployeeShifts {
+  id         String   @id @default(cuid())
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  shift      Shift    @relation(fields: [shiftId], references: [id])
+  shiftId    String
 }

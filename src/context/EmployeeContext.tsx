@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { trpc } from "../utils/trpc";
-import { UseTRPCQueryResult } from "@trpc/react-query/shared";
 
 type ContextType = {
   employeeList: Employee[] | undefined;
