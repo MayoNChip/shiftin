@@ -87,6 +87,7 @@ function index() {
       dayToUpdate[0] = { ...day, active: e.currentTarget.checked };
       workDaysArray[idx] = dayToUpdate[0];
     }
+    console.log(workDaysArray);
     setWeekDays([...workDaysArray]);
   };
 
@@ -125,9 +126,9 @@ function index() {
     if (weekDays.length < 0) {
       return;
     }
-    console.log("Create", { weekDays });
+    // console.log("Create", { weekDays });
     const result = scheduleMutation.mutate(weekDays);
-    console.log(result);
+    // console.log(result);
   };
 
   console.log(weekDays);

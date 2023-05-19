@@ -1,8 +1,15 @@
-import { Button } from "@mui/material";
+import { Autocomplete, Button, Select, TextField } from "@mui/material";
 import Card from "../../components/Schedule";
 import CreateNewScheduleModal from "../../components/CreateNewScheduleModal";
 import { ChangeEvent, useState } from "react";
 import { trpc } from "../../utils/trpc";
+import EmployeeList from "../../components/EmployeeList";
+
+type Schedule = {
+  workDayId: number;
+  employeeId: string;
+  shiftTypeId: number;
+}[];
 
 function index() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,6 +18,36 @@ function index() {
   const createNewShift = trpc.scheduleRouter.createNewSchedule.useMutation();
   const [newShift, setNewShift] =
     useState<{ shiftTypeId: number; workDayId: number }[]>();
+  const employees = trpc.employeeRouter.getAll.useQuery();
+  const assignEmployee = trpc.scheduleRouter.setEmployeeToShift.useMutation();
+  const [schedule, setSchedule] = useState<Schedule>([]);
+
+  const setEmployeeToShift = async () => {
+    console.log("setting employees");
+    schedule.map(
+      async (shift) =>
+        await assignEmployee.mutateAsync({
+          employeeId: shift.employeeId,
+          shiftTypeId: shift.shiftTypeId,
+          workDayId: shift.workDayId,
+        })
+    );
+  };
+
+  const handleAssignEmployee = (
+    workDayId: number,
+    shiftTypeId: number,
+    employeeId: string
+  ) => {
+    console.log(workDayId, shiftTypeId, employeeId);
+    const employeeToAdd = {
+      workDayId,
+      shiftTypeId,
+      employeeId,
+    };
+    setSchedule([...schedule, employeeToAdd]);
+  };
+  console.log(schedule);
 
   // const handleCreateNewSchedule = async () => {
   //   if (!workDays.data || !shiftTypes.data) {
@@ -58,7 +95,55 @@ function index() {
                     className="border-2 border-gray-900 px-4"
                   >
                     <h1>{shiftType.shiftType}</h1>
-                    <div>add emloyees here</div>
+                    {/* <Select>
+                      {employees.data?.map((employee) => {
+                        return (
+                          <option value={employee.id}>
+                            {employee.firstName + employee.lastName}
+                          </option>
+                        );
+                      })}
+                    </Select> */}
+                    {employees.data && (
+                      <>
+                        {employees.data?.map((employee) => {
+                          return (
+                            <Autocomplete
+                              className="my-4"
+                              disablePortal
+                              id="combo-box-demo"
+                              options={employees.data.map(
+                                (employee) => employee.firstName
+                              )}
+                              sx={{ width: 300 }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Search for employee"
+                                />
+                              )}
+                              onChange={() =>
+                                handleAssignEmployee(
+                                  day.id,
+                                  shiftType.id,
+                                  employee.id
+                                )
+                              }
+                            />
+                          );
+                        })}
+                        <Button onClick={setEmployeeToShift}>Save</Button>
+                      </>
+                    )}
+                    {/* <Select>
+                      {employees.data?.map((employee) => {
+                        return (
+                          <option value={employee.id}>
+                            {employee.firstName + employee.lastName}
+                          </option>
+                        );
+                      })}
+                    </Select> */}
                   </div>
                 );
               })}
@@ -79,6 +164,7 @@ function index() {
         isOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
       />  */}
+      <EmployeeList />
     </div>
   );
 }

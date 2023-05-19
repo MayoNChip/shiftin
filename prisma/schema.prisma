@@ -29,7 +29,7 @@ model Shift {
   shiftType   ShiftType?       @relation(fields: [shiftTypeId], references: [id])
   shiftTypeId Int?
   workDay     WorkDay?         @relation(fields: [workDayId], references: [id])
-  workDayId   Int
+  workDayId   Int?
   employees   EmployeeShifts[]
 }
 
@@ -48,7 +48,8 @@ model Employee {
   // shiftId   String?
   firstName     String
   lastName      String
-  role          Int
+  role          Role?            @relation(fields: [roldId], references: [id])
+  roldId        Int?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   employeeShift EmployeeShifts[]
@@ -60,4 +61,10 @@ model EmployeeShifts {
   employeeId String
   shift      Shift    @relation(fields: [shiftId], references: [id])
   shiftId    String
+}
+
+model Role {
+  id       Int        @id @default(autoincrement())
+  roleName String
+  employee Employee[]
 }

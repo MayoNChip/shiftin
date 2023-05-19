@@ -87,13 +87,13 @@ function Schedule() {
           </>
         );
       })}
-      <button
+      {/* <button
         onClick={() => {
           addShift.mutate({ firstName: "ido", lastName: "Cohen" });
         }}
       >
         Add
-      </button>
+      </button> */}
     </div>
   );
 }

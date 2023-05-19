@@ -37,48 +37,7 @@ export const ScheduleRouter = router({
       if (workDays.length < 1) {
         await ctx.prisma.workDay.createMany({
           data: [
-            {
-              day: "sunday",
-              // week: input.monthWeek.week,
-              // month: input.monthWeek.month,
-              active: false,
-            },
-            {
-              day: "monday",
-              // week: input.monthWeek.week,
-              // month: input.monthWeek.month,
-              active: false,
-            },
-            {
-              day: "tuesday",
-              // week: input.monthWeek.week,
-              // month: input.monthWeek.month,
-              active: false,
-            },
-            {
-              day: "wednesday",
-              // week: input.monthWeek.week,
-              // month: input.monthWeek.month,
-              active: false,
-            },
-            {
-              day: "thursday",
-              // week: input.monthWeek.week,
-              // month: input.monthWeek.month,
-              active: false,
-            },
-            {
-              day: "friday",
-              // week: input.monthWeek.week,
-              // month: input.monthWeek.month,
-              active: false,
-            },
-            {
-              day: "saturday",
-              // week: input.monthWeek.week,
-              // month: input.monthWeek.month,
-              active: false,
-            },
+           ...input
           ],
         });
       }
@@ -149,14 +108,14 @@ export const ScheduleRouter = router({
     }),
 
   setEmployeeToShift: publicProcedure
-    .input(z.object({ firstName: z.string(), lastName: z.string() }))
+    .input(z.object({ shiftTypeId: z.number(), employeeId: z.string(), workDayId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      const result = await ctx.prisma.employee.create({
-        data: { ...input, role: 1 },
-      });
-      // const result = await ctx.prisma.employee.create({data: {...input}})
+      // const result = await ctx.prisma.employee.create({
+      //   data: { ...input, role: 1 },
+      // });
+      const result = await ctx.prisma.shift.create({data: {shiftTypeId: input.shiftTypeId, employees: {create:{employeeId: input.employeeId}}, workDayId:input.workDayId}})
       console.log(result);
-      return "Great";
+      return result;
     }),
   getAllShiftTypes: publicProcedure.query(async ({ ctx }) => {
     const shiftTypes = await ctx.prisma.shiftType.findMany();

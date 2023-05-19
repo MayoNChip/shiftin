@@ -11,7 +11,7 @@ function EmployeeList() {
   return (
     <div className="mt-20 flex h-full w-1/2 flex-col gap-y-6 self-center bg-gray-200 p-4">
       {employeeContext?.employeeList?.map((employee) => (
-        <div>
+        <div key={employee.id}>
           <h2>{employee.id}</h2>
           <h2>{employee.firstName}</h2>
           <h2>{employee.lastName}</h2>

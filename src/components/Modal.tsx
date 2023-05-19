@@ -7,6 +7,9 @@ import {
   Button,
   Snackbar,
   ClickAwayListener,
+  Select,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { useSnackbar } from "@mui/base";
 import { ChangeEvent, useState } from "react";
@@ -15,6 +18,7 @@ import { trpc } from "../utils/trpc";
 import MySnackbar from "./MySnackbar";
 import { TRPCClient } from "@trpc/client";
 import { QueryClient } from "@tanstack/react-query";
+import { Employee } from "@prisma/client";
 
 interface Props {
   isOpen: boolean;
@@ -24,12 +28,16 @@ interface Props {
 interface newUserType {
   firstName: string;
   lastName: string;
+  roleId: number;
 }
+
+// interface CreateEmployee
 
 function Modal({ isOpen, setIsModalOpen }: Props) {
   const [newUserDetails, setNewUserDetails] = React.useState<newUserType>({
     firstName: "",
     lastName: "",
+    roleId: 1,
   });
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(true);
   const employeeMutation = trpc.employeeRouter.addEmployee.useMutation();
@@ -52,13 +60,28 @@ function Modal({ isOpen, setIsModalOpen }: Props) {
     setNewUserDetails({ ...newUserDetails, lastName: e.target.value });
   };
 
+  const handleRoleChange = (
+    e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    console.log(e.target.value);
+    setNewUserDetails({ ...newUserDetails, roleId: parseInt(e.target.value) });
+  };
+
   const handleClose = () => {
     setIsModalOpen(false);
   };
 
+  console.log(newUserDetails);
+
   const handleCreateEmployee = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
+    if (
+      !newUserDetails.roleId ||
+      !newUserDetails.firstName ||
+      !newUserDetails.lastName
+    )
+      return;
     employeeMutation.mutate(
       { ...newUserDetails },
       {
@@ -97,6 +120,27 @@ function Modal({ isOpen, setIsModalOpen }: Props) {
             fullWidth
             variant="standard"
             onChange={(e) => handleLastNameChange(e)}
+          />
+          {/* <TextField
+            autoFocus
+            margin="dense"
+            id="role"
+            label="Role"
+            type="text"
+            fullWidth
+            variant="standard"
+            onChange={(e) => handleRoleChange(e)}
+          /> */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                // checked={day.active}
+                name="waiter"
+                value="1"
+                onChange={(e) => handleRoleChange(e)}
+              />
+            }
+            label="Waiter"
           />
           <ClickAwayListener onClickAway={onClickAway}>
             <Snackbar {...getRootProps()}>
